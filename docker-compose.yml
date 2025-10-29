@@ -16,7 +16,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-  # 🧰 phpMyAdmin (web UI for MySQL)
+  # 🧰 phpMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
@@ -31,7 +31,7 @@ services:
     depends_on:
       - mysql
 
-  # 🚀 Laravel backend
+  # 🚀 Laravel backend (API)
   backend:
     build:
       context: ./backend
@@ -40,21 +40,13 @@ services:
     restart: always
     volumes:
       - ./backend:/var/www
-    environment:
-      APP_ENV: local
-      APP_DEBUG: true
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: laravel
-      DB_USERNAME: laravel
-      DB_PASSWORD: laravel
-      REDIS_HOST: redis
+    env_file:
+      - ./backend/.env
     depends_on:
       - mysql
       - redis
 
-  # 💻 Vue frontend
+  # 💻 Vue frontend (build production)
   frontend:
     build:
       context: ./frontend
@@ -62,8 +54,7 @@ services:
     container_name: vue
     restart: always
     working_dir: /app
-    ports:
-      - "5173:5173"
+    command: sh -c "npm install && npm run build"
     volumes:
        - ./frontend:/app
        - ./backend/public:/app/dist
@@ -71,7 +62,7 @@ services:
     depends_on:
       - backend
 
-  # 🌐 Nginx server
+  # 🌐 Nginx web server
   nginx:
     image: nginx:alpine
     container_name: nginx
@@ -84,7 +75,7 @@ services:
     depends_on:
       - backend
 
-  # 🔴 Redis (cache, queue, session)
+  # 🔴 Redis
   redis:
     image: redis:alpine
     container_name: redis
