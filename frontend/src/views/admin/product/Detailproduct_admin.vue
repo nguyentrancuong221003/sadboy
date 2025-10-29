@@ -46,7 +46,7 @@
             } else if (meta.filetype === 'file') {
                 type = 'document'
             }
-            const cmsURL = `http://localhost:8000/laravel-filemanager?editor=${meta.fieldname}&type=${type}`
+            const cmsURL = `http://sadboy.site/laravel-filemanager?editor=${meta.fieldname}&type=${type}`
             tinymce.activeEditor.windowManager.openUrl({
             title: 'Chọn file',
             url: cmsURL,
@@ -55,7 +55,7 @@
             onMessage: (api, message) => {
                 let url = message.content
                 if (url.startsWith('/')) {
-                url = 'http://localhost:8000' + url
+                url = 'http://sadboy.site' + url
                 }
                 if (meta.filetype === 'file') {
                 callback(url, { text: 'Tài liệu tải về' })

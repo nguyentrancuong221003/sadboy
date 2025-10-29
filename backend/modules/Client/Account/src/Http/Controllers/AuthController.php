@@ -14,19 +14,17 @@ class AuthController extends Controller
     {
         try {
             $credentials = $request->only('email', 'password');
-
-
             if (! $token = auth()->guard('user')->attempt($credentials)) {
                 throw new \Exception('Unauthorized', 401);
             }
-           
+
             $user=auth()->guard('user')->user();
 
+            JWTAuth::factory()->setTTL(10080);
             $refreshToken = JWTAuth::customClaims([
                 'type' => 'refresh_token'
             ])->fromUser($user);
 
-            JWTAuth::factory()->setTTL(10080);
             $host = env('APP_URL');
             return response()->json([
                 'message' => 'Đăng nhập thành công',
@@ -39,9 +37,9 @@ class AuthController extends Controller
                     'date_birth' => $user->date_birth
                 ]
             ], 200)->cookie(
-                'access_token', $token, 15, '/', null, false, true
+                'access_token', $token, 15, '/', '.sadboy.site', false, true
             )->cookie(
-                'refresh_token', $refreshToken, 10080, '/', null, false, true
+                'refresh_token', $refreshToken, 10080, '/', '.sadboy.site', false, true
             );
         }
         catch(\Exception $e) {
@@ -88,9 +86,8 @@ class AuthController extends Controller
             // Tạo lại access token mới (TTL mặc định)
             $newToken = JWTAuth::fromUser($user);
 
-            return response()->json(['message' => 'Token refreshed successfully'])->cookie(
-                'access_token', $newToken, 15, '/', null, false, true
-            );
+            return response()->json(['message' => 'Token refreshed successfully'])
+            ->cookie('access_token', $newToken, 15, '/', '.sadboy.site', false, true);
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
             return response()->json(['error' => 'Refresh token expired'], 401);
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
@@ -106,8 +103,8 @@ class AuthController extends Controller
             JWTAuth::invalidate(JWTAuth::getToken());
 
             return response()->json(['message' => 'Đăng xuất thành công'])
-                ->cookie('access_token', '', -1, '/', null, false, true)
-                ->cookie('refresh_token', '', -1, '/', null, false, true);
+                ->cookie('access_token', '', -1, '/', '.sadboy.site', false, true)
+                ->cookie('refresh_token', '', -1, '/', '.sadboy.site', false, true);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Logout failed'], 500);
         }
